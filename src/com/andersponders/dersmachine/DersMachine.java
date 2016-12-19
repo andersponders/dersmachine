@@ -32,27 +32,29 @@ public class DersMachine {
 		{
 			String[] split = line.split(" ", 2);
 			String opcode = split[0];
-			String operands;
+			String operands = split[1];
+			String[] splitOperands;
 			switch (opcode)
 			{
 			case "put_structure":
-				operands = split[1];
-				String[] splitOperands = operands.split(",");
+				splitOperands = operands.split(",");
 				put_structure(splitOperands[0], Integer.parseInt(splitOperands[1]));
 				break;
 			case "set_variable":
-				operands = split[1];
 				set_variable(Integer.parseInt(operands));
 				break;
 			case "set_value":
-				operands = split[1];
 				set_value(Integer.parseInt(operands));
 				break;
 			case "get_structure":
+				splitOperands = operands.split(",");
+				get_structure(splitOperands[0], Integer.parseInt(splitOperands[1]));
 				break;
 			case "unify_variable":
+				unify_variable(Integer.parseInt(operands));
 				break;
 			case "unify_value":
+				unify_value(Integer.parseInt(operands));
 				break;
 			default: 
 				//this is an error
