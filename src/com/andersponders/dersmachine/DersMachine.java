@@ -9,6 +9,7 @@ public class DersMachine {
 	private int H; //top of heap register
 	private int S; //next subterm
 	private int P; //next instruction
+	private int CP; //save instruction pointer (to return from call)
 	private List<HeapCell> heap;
 	private String[] code; //code area
 	private int[] X; //general-purpose registers
@@ -25,6 +26,7 @@ public class DersMachine {
 		S = 0;
 		H = 0;
 		P = 0;
+		CP = 0;
 		currentMode = Mode.WRITE;
 		PDL = new Stack<Integer>();
 	}
@@ -85,9 +87,15 @@ public class DersMachine {
 				splitOperands = operands.split(",");
 				get_value(Integer.parseInt(splitOperands[0]), Integer.parseInt(splitOperands[1]));
 				break;
+			case "call": 
+				call(operands);
+				break;
+			case "proceed": 
+				proceed();
+				break;
 			default: 
 				//this is an error
-				throw new RuntimeException("Invalid opcode.");
+				throw new RuntimeException("Invalid opcode: " + opcode);
 			}
 			if (P>=code.length) done=true;
 		}
@@ -207,11 +215,14 @@ public class DersMachine {
 	
 	public void call(String functor)
 	{
+		CP = P+1;//point to next instruction when we resume
 		int addr=-1;
 		for (int i=0; i<code.length; i++)
 		{
-			if (code[i].startsWith(functor)) addr=i;
-			break;
+			if (code[i].startsWith(functor)){ 
+				addr=i;
+				break;
+			}
 		}
 		if (addr!=-1)
 		{
@@ -225,8 +236,9 @@ public class DersMachine {
 	
 	public void proceed()
 	{
-		
+		P=CP;//restore to the next instruction after call()
 	}
+	
 	//utility functions
 	private int deref(int address)
 	{

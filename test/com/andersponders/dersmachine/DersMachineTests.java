@@ -32,6 +32,7 @@ public class DersMachineTests {
 			+ "set_variable 5\n"
 			+ "put_structure f/1,3\n"
 			+ "set_value 5\n"
+			+ "call p/3\n"
 			+ "p/3 : get_structure f/1,1\n"
 			+ "unify_variable 4\n"
 			+ "get_structure h/2,2\n"
