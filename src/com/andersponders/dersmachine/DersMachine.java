@@ -7,14 +7,17 @@ import java.util.Stack;
 public class DersMachine {
 	private int H; //top of heap register
 	private int S; //next subterm
+	private int P; //next instruction
 	private List<HeapCell> heap;
-	private int[] X; //list of general-purpose registers
+	private int[] X; //general-purpose registers
+	private int[] A; //argument registers
 	private Stack<Integer> PDL;
 	private Mode currentMode;
 	
 	public DersMachine() //default constructor
 	{
-		X = new int[32];
+		X = new int[64];
+		A = new int[64];
 		heap = new ArrayList<HeapCell>();
 		S = 0;
 		H = 0;
