@@ -14,6 +14,33 @@ public class DersMachineTests {
 			+ "set_value 2\n"
 			+ "set_value 3\n"
 			+ "set_value 4\n";
+	
+	private static final String program = "p/3 : get_structure f/1,1\n"
+			+ "unify_variable 4\n"
+			+ "get_structure h/2,2\n"
+			+ "unify_variable 5\n"
+			+ "unify_variable 6\n"
+			+ "get_value 5,3\n"
+			+ "get_structure f/1,6\n"
+			+ "unify_variable 7\n"
+			+ "get_structure a/0,7\n"
+			+ "proceed\n";
+	
+	private static final String query_program = "put_variable 4,1\n"
+			+ "put_structure h/2,2\n"
+			+ "set_value 4\n"
+			+ "set_variable 5\n"
+			+ "put_structure f/1,3\n"
+			+ "set_value 5\n"
+			+ "p/3 : get_structure f/1,1\n"
+			+ "unify_variable 4\n"
+			+ "get_structure h/2,2\n"
+			+ "unify_variable 5\n"
+			+ "unify_variable 6\n"
+			+ "get_value 5,3\n"
+			+ "get_structure f/1,6\n"
+			+ "unify_variable 7\n"
+			+ "get_structure a/0,7\n";
 	@Test
 	public void testInit() {
 		DersMachine machine = new DersMachine();
@@ -25,10 +52,18 @@ public class DersMachineTests {
 	}
 	
 	@Test
-	public void test_run()
+	public void test_query()
 	{
 		DersMachine machine = new DersMachine();
 		machine.load(query);
+		machine.pp_heap();
+	}
+	
+	@Test
+	public void test_program()
+	{
+		DersMachine machine = new DersMachine();
+		machine.load(query_program);
 		machine.pp_heap();
 	}
 

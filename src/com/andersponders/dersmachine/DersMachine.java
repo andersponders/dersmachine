@@ -1,6 +1,7 @@
 package com.andersponders.dersmachine;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Stack;
 
@@ -9,10 +10,12 @@ public class DersMachine {
 	private int S; //next subterm
 	private int P; //next instruction
 	private List<HeapCell> heap;
+	private String[] code; //code area
 	private int[] X; //general-purpose registers
 	private int[] A; //argument registers
 	private Stack<Integer> PDL;
 	private Mode currentMode;
+	private static final String labelRegex = "^([a-z]+/\\d :).*";
 	
 	public DersMachine() //default constructor
 	{
@@ -21,16 +24,26 @@ public class DersMachine {
 		heap = new ArrayList<HeapCell>();
 		S = 0;
 		H = 0;
+		P = 0;
 		currentMode = Mode.WRITE;
 		PDL = new Stack<Integer>();
 	}
 	
-	public void load(String code)
+	public void load(String text)
 	{
-		String[] lines = code.split("\\r?\\n");
-		for (String line : lines)
+		code = text.split("\\r?\\n");
+		boolean done = false;
+		while (!done)
 		{
-			String[] split = line.split(" ", 2);
+			String instr = code[P];
+			String[] split;
+			if (instr.matches(labelRegex))
+			{
+				split = instr.split(" : ");
+				String label = split[0];
+				instr = split[1];
+			}
+			split = instr.split(" ", 2);
 			String opcode = split[0];
 			String operands = split[1];
 			String[] splitOperands;
@@ -56,11 +69,27 @@ public class DersMachine {
 			case "unify_value":
 				unify_value(Integer.parseInt(operands));
 				break;
+			case "put_variable":
+				splitOperands = operands.split(",");
+				put_variable(Integer.parseInt(splitOperands[0]), Integer.parseInt(splitOperands[1]));
+				break;
+			case "put_value":
+				splitOperands = operands.split(",");
+				put_value(Integer.parseInt(splitOperands[0]), Integer.parseInt(splitOperands[1]));
+				break;
+			case "get_variable":
+				splitOperands = operands.split(",");
+				get_variable(Integer.parseInt(splitOperands[0]), Integer.parseInt(splitOperands[1]));
+				break;
+			case "get_value":
+				splitOperands = operands.split(",");
+				get_value(Integer.parseInt(splitOperands[0]), Integer.parseInt(splitOperands[1]));
+				break;
 			default: 
 				//this is an error
 				throw new RuntimeException("Invalid opcode.");
 			}
-				
+			if (P>=code.length) done=true;
 		}
 	}
 	
@@ -69,9 +98,10 @@ public class DersMachine {
 	public void put_structure(String functorname, int i)
 	{
 		heap.add(new HeapCell("STR", H+1));
-		X[i]=H+1;
+		X[i]=H;
 		heap.add(new HeapCell(functorname, -1));
 		H+=2;
+		P++;
 	}
 	
 	public void get_structure(String functorname, int i)
@@ -96,8 +126,10 @@ public class DersMachine {
 			break;
 		default:
 			//this should not happen
+			pp_heap();
 			throw new RuntimeException("System error - invalid heap tag:" + cell.tag);
 		}
+		P++;
 	}
 	
 	public void unify_variable(int i)
@@ -114,6 +146,7 @@ public class DersMachine {
 			break;
 		}
 		S++;
+		P++;
 	}
 	
 	public void unify_value(int i)
@@ -127,6 +160,7 @@ public class DersMachine {
 			heap.add(new HeapCell("REF", X[i]));
 		}
 		S++;
+		P++;
 	}
 	
 	public void set_variable(int i)
@@ -134,14 +168,65 @@ public class DersMachine {
 		heap.add(new HeapCell("REF", H));
 		X[i]=H;
 		H++;
+		P++;
 	}
 	
 	public void set_value(int i)
 	{
 		heap.add(new HeapCell("REF", X[i]));
 		H++;
+		P++;
 	}
 	
+	public void put_variable(int n, int i)
+	{
+		heap.add(new HeapCell("REF", H));
+		X[n]=H;
+		X[i]=H;
+		H++;
+		P++;
+	}
+	
+	public void put_value(int n, int i)
+	{
+		X[i]=X[n];
+		P++;
+	}
+	
+	public void get_variable(int n, int i)
+	{
+		X[n]=X[i];
+		P++;
+	}
+	
+	public void get_value(int n, int i)
+	{
+		unify(X[n], X[i]);
+		P++;
+	}
+	
+	public void call(String functor)
+	{
+		int addr=-1;
+		for (int i=0; i<code.length; i++)
+		{
+			if (code[i].startsWith(functor)) addr=i;
+			break;
+		}
+		if (addr!=-1)
+		{
+			P=addr;
+		}
+		else
+		{
+			throw new RuntimeException("Invalid functor (not found): " + functor);
+		}
+	}
+	
+	public void proceed()
+	{
+		
+	}
 	//utility functions
 	private int deref(int address)
 	{
