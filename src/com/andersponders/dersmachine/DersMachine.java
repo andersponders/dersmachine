@@ -49,8 +49,9 @@ public class DersMachine {
 			}
 			split = instr.split(" ", 2);
 			String opcode = split[0];
-//			pp_heap();
-//			System.out.println(opcode);
+			pp_heap();
+			pp_registers();
+			System.out.println(opcode);
 			String operands = "";
 			if (!opcode.equals("proceed") && !opcode.equals("done"))
 			{
@@ -327,11 +328,16 @@ public class DersMachine {
 	}
 	public void pp_registers()
 	{
+		System.out.print("H:[ " + H + " ] " );
+		System.out.print("S:[ " + S + " ] " );
+		System.out.print("P:[ " + P + " ] " );
+		System.out.print("CP:[ " + CP + " ] " );
+		System.out.println("MODE:[ " + currentMode.toString() + " ]");
 		for (int i=0; i<X.length; i+=8)
 		{
 			for (int j=0; j<8; j++)
 			{
-				System.out.print("X"+ (i+j) + ":[ " + X[i+j] + " ]" );
+				System.out.print("X"+ (i+j) + ":[ " + X[i+j] + " ] " );
 			}
 			System.out.println();
 		}
