@@ -26,6 +26,11 @@ public class DersMachineTests {
 			+ "get_structure a/0,7\n"
 			+ "proceed\n";
 	
+	/*
+	 * ?- p(Z, h(Z, W), f(W)).
+	 *    p(f(X),h(Y,f(a)),Y).
+	 * 
+	 */
 	private static final String query_program = "put_variable 4,1\n"
 			+ "put_structure h/2,2\n"
 			+ "set_value 4\n"

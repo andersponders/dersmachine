@@ -17,7 +17,6 @@ public class DersMachine {
 	private List<HeapCell> heap;
 	private String[] code; //code area
 	private int[] X; //general-purpose registers
-	private int[] A; //argument registers
 	private Stack<Integer> PDL;
 	private Mode currentMode;
 	private static final String labelRegex = "^([a-z]+/\\d :).*";
@@ -25,7 +24,6 @@ public class DersMachine {
 	public DersMachine() //default constructor
 	{
 		X = new int[32];
-		A = new int[32];
 		heap = new ArrayList<HeapCell>();
 		S = 0;
 		H = 0;
@@ -51,6 +49,8 @@ public class DersMachine {
 			}
 			split = instr.split(" ", 2);
 			String opcode = split[0];
+//			pp_heap();
+//			System.out.println(opcode);
 			String operands = "";
 			if (!opcode.equals("proceed") && !opcode.equals("done"))
 			{
@@ -137,7 +137,7 @@ public class DersMachine {
 			currentMode=Mode.WRITE;
 			break;
 		case "STR":
-			if (heap.get(cell.data).tag==functorname)
+			if (heap.get(cell.data).tag.equals(functorname))
 			{
 				S=cell.data+1;
 				currentMode=Mode.READ;
@@ -254,14 +254,26 @@ public class DersMachine {
 	private int deref(int address)
 	{
 		HeapCell cell = heap.get(address);
-		if (cell.tag=="REF" && cell.data!=address)
+		if (cell.tag.equals("REF") && cell.data!=address)
 			return deref(cell.data);
 		else return address;
 	}
 	
-	private void bind(int addr, int TOS)
+	private void bind(int a1, int a2)
 	{
-		//TODO
+		String t1,t2;
+		t1=heap.get(a1).tag;
+		t2=heap.get(a2).tag;
+		if (t1.equals("REF") && (!t2.equals("REF")|a2<a1))
+		{
+			heap.get(a1).data=heap.get(a2).data;
+			heap.get(a1).tag=heap.get(a2).tag;
+		}
+		else 
+		{
+			heap.get(a2).data=heap.get(a1).data;
+			heap.get(a2).tag=heap.get(a1).tag;
+		}
 	}
 	
 	private void unify(int a1, int a2)
@@ -278,7 +290,7 @@ public class DersMachine {
 			{
 				HeapCell t1 = heap.get(d1);
 				HeapCell t2 = heap.get(d2);
-				if (t1.tag=="REF"|t2.tag=="REF")
+				if (t1.tag.equals("REF")|t2.tag.equals("REF"))
 				{
 					//one or both is a reference
 					bind(d1, d2);
@@ -290,7 +302,7 @@ public class DersMachine {
 					HeapCell f2 = heap.get(t2.data);
 					int arity1 = Integer.parseInt(f1.tag.split("/")[1]);
 					int arity2 = Integer.parseInt(f2.tag.split("/")[1]);
-					if (f1.tag==f2.tag && arity1==arity2)
+					if (f1.tag.equals(f2.tag) && arity1==arity2)
 					{
 						for(int i=1; i<=arity1; i++)
 						{
