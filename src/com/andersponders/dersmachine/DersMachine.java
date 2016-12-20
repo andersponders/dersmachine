@@ -1,5 +1,9 @@
 package com.andersponders.dersmachine;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -20,8 +24,8 @@ public class DersMachine {
 	
 	public DersMachine() //default constructor
 	{
-		X = new int[64];
-		A = new int[64];
+		X = new int[32];
+		A = new int[32];
 		heap = new ArrayList<HeapCell>();
 		S = 0;
 		H = 0;
@@ -47,7 +51,11 @@ public class DersMachine {
 			}
 			split = instr.split(" ", 2);
 			String opcode = split[0];
-			String operands = split[1];
+			String operands = "";
+			if (!opcode.equals("proceed") && !opcode.equals("done"))
+			{
+				operands=split[1];
+			}
 			String[] splitOperands;
 			switch (opcode)
 			{
@@ -92,6 +100,9 @@ public class DersMachine {
 				break;
 			case "proceed": 
 				proceed();
+				break;
+			case "done":
+				done=true;
 				break;
 			default: 
 				//this is an error
@@ -301,5 +312,25 @@ public class DersMachine {
 			else System.out.println();
 			addr++;
 		}
+	}
+	public void pp_registers()
+	{
+		for (int i=0; i<X.length; i+=8)
+		{
+			for (int j=0; j<8; j++)
+			{
+				System.out.print("X"+ (i+j) + ":[ " + X[i+j] + " ]" );
+			}
+			System.out.println();
+		}
+	}
+	public static void main(String[] args) throws IOException
+	{
+		Path filepath = Paths.get(args[0]);
+		String program = new String(Files.readAllBytes(filepath));
+		DersMachine machine = new DersMachine();
+		machine.load(program);
+		machine.pp_heap();
+		machine.pp_registers();
 	}
 }

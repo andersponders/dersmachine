@@ -33,6 +33,7 @@ public class DersMachineTests {
 			+ "put_structure f/1,3\n"
 			+ "set_value 5\n"
 			+ "call p/3\n"
+			+ "done\n"
 			+ "p/3 : get_structure f/1,1\n"
 			+ "unify_variable 4\n"
 			+ "get_structure h/2,2\n"
@@ -41,7 +42,8 @@ public class DersMachineTests {
 			+ "get_value 5,3\n"
 			+ "get_structure f/1,6\n"
 			+ "unify_variable 7\n"
-			+ "get_structure a/0,7\n";
+			+ "get_structure a/0,7\n"
+			+ "proceed\n";
 	@Test
 	public void testInit() {
 		DersMachine machine = new DersMachine();
@@ -58,6 +60,7 @@ public class DersMachineTests {
 		DersMachine machine = new DersMachine();
 		machine.load(query);
 		machine.pp_heap();
+		machine.pp_registers();
 	}
 	
 	@Test
@@ -66,6 +69,7 @@ public class DersMachineTests {
 		DersMachine machine = new DersMachine();
 		machine.load(query_program);
 		machine.pp_heap();
+		machine.pp_registers();
 	}
 
 }
